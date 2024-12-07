@@ -1,36 +1,21 @@
 steps:
-  # Step 1: Build the Docker image
-  - name: 'gcr.io/cloud-builders/docker'
-    args: [
-      'build', 
-      '-t', 
-      'us-central1-docker.pkg.dev/white-fiber-362314/thet-100966131/assignment-server:$COMMIT_SHA', 
-      '.'
-    ]
-    id: "Build Docker Image"
-
-  # Step 2: Push the built Docker image to Artifact Registry
-  - name: 'gcr.io/cloud-builders/docker'
-    args: [
-      'push', 
-      'us-central1-docker.pkg.dev/white-fiber-362314/thet-100966131/assignment-server:$COMMIT_SHA'
-    ]
-    id: "Push Docker Image"
-
-  # Step 3: Deploy to Cloud Run
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: 'gcloud'
-    args: [
-      'run', 
-      'deploy', 
-      'firstname-studentid-service', 
-      '--image', 
-      'us-central1-docker.pkg.dev/white-fiber-362314/thet-100966131/assignment-server:$COMMIT_SHA', 
-      '--region', 
-      'us-central1'
-    ]
-    id: "Deploy to Cloud Run"
-
-# Set log storage behavior to use only Cloud Logging
+  # Step 1: Build the Docker image and tag it with the commit SHA
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      - "build"
+      - "-t"
+      - "us-central1-docker.pkg.dev/white-fiber-362314/thet-100966131/assignment-server:$COMMIT_SHA"
+      - "./"
+  
+  # Step 2: Push the Docker image to Google Container Registry
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      - "push"
+      - "us-central1-docker.pkg.dev/white-fiber-362314/thet-100966131/assignment-server:$COMMIT_SHA"
+  
+images:
+  - "us-central1-docker.pkg.dev/white-fiber-362314/thet-100966131/assignment-server:$COMMIT_SHA"
+  
 options:
-  logging: CLOUD_LOGGING_ONLY
+  defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
+
