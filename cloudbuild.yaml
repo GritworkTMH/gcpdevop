@@ -1,28 +1,40 @@
-# cloudbuild.yaml
+# Define the build steps for Cloud Build
 steps:
-  # Step 1: Use the Docker Cloud Builder image to build the Docker image
+  # Step 1: Build the Docker image
   - name: 'gcr.io/cloud-builders/docker'
-    args: [
-      'build', 
-      '-t', 'us-central1-docker.pkg.dev/white-fiber-362314/thet-100966131/assignment-server:$COMMIT_SHA', 
-      '.'
-    ]
+    args: ['build', '-t', 'gcr.io/white-fiber-362314/thet-100966131:$SHORT_SHA', '.']
 
-  # Step 2: Push the built Docker image to the Artifact Registry
+  # Step 2: Push the Docker image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: [
-      'push', 
-      'us-central1-docker.pkg.dev/white-fiber-362314/thet-100966131/assignment-server:$COMMIT_SHA'
-    ]
+    args: ['push', 'gcr.io/white-fiber-362314/thet-100966131:$SHORT_SHA']
 
-# Images section defines the output Docker image
+# Specify the output images for this build
 images:
-  - 'us-central1-docker.pkg.dev/white-fiber-362314/thet-100966131/assignment-server:$COMMIT_SHA'
+  - 'gcr.io/white-fiber-362314/thet-100966131:$SHORT_SHA'
 
-# Define log storage behavior
+# Set a timeout for the build
+timeout: '1200s'
+
+# Define options for the build
 options:
   logging: CLOUD_LOGGING_ONLY
+  machineType: 'E2_HIGHCPU_8'
 
-# Set the defaultLogsBucketBehavior to REGIONAL_USER_OWNED_BUCKET
+# Artifacts and logs bucket configuration
 artifacts:
-  logsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
+  objects:
+    location: 'gs://cloud-build-logs-white-fiber-362314'
+    paths: ['**']
+
+# Substitutions for dynamic values
+substitutions:
+  _REGION: 'us-central1'
+
+# Trigger details
+trigger:
+  event: 'push'
+  branch: 'main'
+
+# Optional: Notifications for build results
+notifications:
+  pubsubTopic: 'projects/white-fiber-362314/topics/cloud-builds'
