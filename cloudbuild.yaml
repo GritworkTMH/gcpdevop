@@ -1,0 +1,28 @@
+# cloudbuild.yaml
+steps:
+  # Step 1: Use the Docker Cloud Builder image to build the Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'build', 
+      '-t', 'us-central1-docker.pkg.dev/white-fiber-362314/thet-100966131/assignment-server:$COMMIT_SHA', 
+      '.'
+    ]
+
+  # Step 2: Push the built Docker image to the Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'push', 
+      'us-central1-docker.pkg.dev/white-fiber-362314/thet-100966131/assignment-server:$COMMIT_SHA'
+    ]
+
+# Images section defines the output Docker image
+images:
+  - 'us-central1-docker.pkg.dev/white-fiber-362314/thet-100966131/assignment-server:$COMMIT_SHA'
+
+# Define log storage behavior
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+# Set the defaultLogsBucketBehavior to REGIONAL_USER_OWNED_BUCKET
+artifacts:
+  logsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
