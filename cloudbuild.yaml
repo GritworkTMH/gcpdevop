@@ -1,40 +1,28 @@
-# Define the build steps for Cloud Build
+# cloudbuild.yaml
 steps:
-  # Step 1: Build the Docker image
+  # Step 1: Use the Docker Cloud Builder image to build the Docker image
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/white-fiber-362314/thet-100966131:$SHORT_SHA', '.']
+    args: [
+      'build', 
+      '-t', 'us-central1-docker.pkg.dev/white-fiber-362314/thet-100966131/assignment-server:$COMMIT_SHA', 
+      '.'
+    ]
+    id: "Build Docker Images"
 
-  # Step 2: Push the Docker image to Artifact Registry
+  # Step 2: Push the built Docker image to the Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/white-fiber-362314/thet-100966131:$SHORT_SHA']
+    args: [
+      'push', 
+      'us-central1-docker.pkg.dev/white-fiber-362314/thet-100966131/assignment-server:$COMMIT_SHA'
+    ]
+    id: "Push to Artifact registery"
 
-# Specify the output images for this build
+# Images section defines the output Docker image
 images:
-  - 'gcr.io/white-fiber-362314/thet-100966131:$SHORT_SHA'
+  - 'us-central1-docker.pkg.dev/white-fiber-362314/thet-100966131/assignment-server:$COMMIT_SHA'
 
-# Set a timeout for the build
-timeout: '1200s'
-
-# Define options for the build
+# Define log storage behavior
 options:
   logging: CLOUD_LOGGING_ONLY
-  machineType: 'E2_HIGHCPU_8'
 
-# Artifacts and logs bucket configuration
-artifacts:
-  objects:
-    location: 'gs://cloud-build-logs-white-fiber-362314'
-    paths: ['**']
 
-# Substitutions for dynamic values
-substitutions:
-  _REGION: 'us-central1'
-
-# Trigger details
-trigger:
-  event: 'push'
-  branch: 'main'
-
-# Optional: Notifications for build results
-notifications:
-  pubsubTopic: 'projects/white-fiber-362314/topics/cloud-builds'
